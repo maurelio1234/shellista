@@ -878,6 +878,8 @@ class Shell(cmd.Cmd):
 						print file_name + (" (%s)" % (self.sizeof_fmt(os.stat(full_file).st_size)))
 					except OSError:
 						print file_name + " (OSError)"
+	do_dir = do_ls
+	
 	def do_unzip(self, line):
 		"""unzip a zip archive"""
 		# filename with optional destination
@@ -1090,7 +1092,28 @@ class Shell(cmd.Cmd):
 				pass
 		else:
 			print "Couldn't touch file"
+	def do_sh(self, line):
+		""" 
+		    basic shell script file interpreter
+		    usage: sh [file] [args]
+		"""
+		def stripComments(s): return s.partition('#')[0]
+		
+		def expandVariables(s, args):
+			for i,v in enumerate(args):
+				s = s.replace('$'+str(i), v)
+			return s
 			
+		args = self.bash(line)
+		with open(args[0]) as f:
+			for line in f:
+				line = expandVariables(stripComments(line), args)
+				if line:
+					self.onecmd(line)
+					
+	def do_echo(self, line):
+		print line
+		
 	def do_quit(self,line):
 		"""exit shell"""
 		self.did_quit = True
