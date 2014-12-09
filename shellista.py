@@ -1105,11 +1105,14 @@ class Shell(cmd.Cmd):
 			return s
 			
 		args = self.bash(line)
-		with open(args[0]) as f:
-			for line in f:
-				line = expandVariables(stripComments(line), args)
-				if line:
-					self.onecmd(line)
+		try:
+			with open(args[0]) as f:
+				for line in f:
+					line = expandVariables(stripComments(line), args)
+					if line:
+						self.onecmd(line)
+		except BaseException as e:
+			print 'Exception running script ' + args[0] + ': ' + str(e)
 					
 	def do_echo(self, line):
 		print line
