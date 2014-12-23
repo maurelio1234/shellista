@@ -8,6 +8,7 @@ except ImportError:
 #Option to install required modules as a subdirectory of the shellista.py module
 #or install in the user site-packages folder.
 LOCAL_SITE_PACKAGES=True
+PATH=['scripts']
 
 # Credits
 #
@@ -1103,14 +1104,24 @@ class Shell(cmd.Cmd):
 			for i,v in enumerate(args):
 				s = s.replace('$'+str(i), v)
 			return s
+		def getFilename(scriptName):				
+			for dir in PATH:
+				filename = os.path.expanduser(os.path.join('~/Documents', dir, scriptName))
+				if os.path.exists(filename):
+					return filename
+			return None 
 			
 		args = self.bash(line)
 		try:
-			with open(args[0]) as f:
-				for line in f:
-					line = expandVariables(stripComments(line), args)
-					if line:
-						self.onecmd(line)
+			filename = getFilename(args[0])
+			if filename:
+				with open(filename) as f:
+					for line in f:
+						line = expandVariables(stripComments(line), args)
+						if line:
+							self.onecmd(line)
+			else:
+				print 'Couldn\'nt load script!'
 		except BaseException as e:
 			print 'Exception running script ' + args[0] + ': ' + str(e)
 					
